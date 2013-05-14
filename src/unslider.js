@@ -9,20 +9,21 @@
 
 		//  Set some options
 		_.o = {
-			speed: 500,   // animation speed, false for no transition (integer or boolean)
-			delay: 3000,  // delay between slides, false for no autoplay (integer or boolean)
-			init: 0,      // init delay, false for no delay (integer or boolean)
-			pause: !f,    // pause on hover (boolean)
-			loop: !f,     // infinitely looping (boolean)
-			keys: f,      // keyboard shortcuts (boolean)
-			dots: f,      // display ••••o• pagination (boolean)
-			arrows: f,    // display prev/next arrows (boolean)
-			prev: '←',    // text or html inside prev button (string)
-			next: '→',    // same as for prev option
-			fluid: f,     // is it a percentage width? (boolean)
-			complete: f,  // invoke after animation (function with argument)
-			items: '>ul', // slides container selector
-			item: '>li'   // slidable items selector
+			speed: 500,      // animation speed, false for no transition (integer or boolean)
+			delay: 3000,     // delay between slides, false for no autoplay (integer or boolean)
+			init: 0,         // init delay, false for no delay (integer or boolean)
+			pause: !f,       // pause on hover (boolean)
+			loop: !f,        // infinitely looping (boolean)
+			keys: f,         // keyboard shortcuts (boolean)
+			dots: f,         // display ••••o• pagination (boolean)
+			arrows: f,       // display prev/next arrows (boolean)
+			prev: '←',      // text or html inside prev button (string)
+			next: '→',       // same as for prev option
+			fluid: f,        // is it a percentage width? (boolean)
+			complete: f,     // invoke after animation (function with argument)
+			items: '>ul',    // slides container selector
+			item: '>li',     // slidable items selector
+			dotContainer: f, // container for dots
 		};
 
 		_.init = function(el, o) {
@@ -138,10 +139,14 @@
 
 			var speed = callback ? 5 : o.speed | 0,
 				obj = {height: target.outerHeight()};
-
+			
 			if (!ul.queue('fx').length) {
 				//  Handle those pesky dots
-				el.find('.dot').eq(index).addClass('active').siblings().removeClass('active');
+				if (_.o.dotContainer === f) {
+					el.find('.dot').eq(index).addClass('active').siblings().removeClass('active');
+				} else {
+					_.o.dotContainer.find('.dot').eq(index).addClass('active').siblings().removeClass('active');
+				}
 
 				el.animate(obj, speed) && ul.animate($.extend({left: '-' + index + '00%'}, obj), speed, function(data) {
 					_.i = index;
@@ -185,11 +190,20 @@
 				html = '<div class="';
 				html = html + name + 's">' + html + name + ' prev">' + _.o.prev + '</div>' + html + name + ' next">' + _.o.next + '</div></div>';
 			};
-
-			_.el.addClass('has-' + name + 's').append(html).find('.' + name).click(function() {
-				var me = $(this);
-				me.hasClass('dot') ? _.stop().to(me.index()) : me.hasClass('prev') ? _.prev() : _.next();
-			});
+			
+			if (_.o.dotContainer === f) {
+				_.el.append(html).find('.' + name).click(function() {
+					var me = $(this);
+					me.hasClass('dot') ? _.stop().to(me.index()) : me.hasClass('prev') ? _.prev() : _.next();
+				});
+			} else {
+				_.o.dotContainer.append(html).find('.' + name).click(function() {
+					var me = $(this);
+					me.hasClass('dot') ? _.stop().to(me.index()) : me.hasClass('prev') ? _.prev() : _.next();
+				});
+			}
+			
+			_.el.addClass('has-' + name + 's');
 		};
 	};
 
